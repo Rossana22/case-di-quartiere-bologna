@@ -447,3 +447,69 @@ footer a { color: var(--gold); }
 .leaflet-popup-content-wrapper { border-radius: 8px; }
 .leaflet-popup-content { font-family: "Inter", sans-serif; font-size: 0.85rem; }
 .leaflet-popup-content b { color: var(--terracotta-dark); font-family: "Playfair Display", serif; }
+
+/* ---------- Homepage: landmark illustrations ---------- */
+
+.landmarks-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: -56px auto 40px;
+  max-width: 1000px;
+  padding: 0 24px;
+  position: relative;
+  z-index: 5;
+}
+
+.landmark-card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-strong);
+  overflow: hidden;
+  text-align: center;
+}
+
+.landmark-visual {
+  background: linear-gradient(160deg, var(--sand), #efdcc7);
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landmark-visual svg {
+  width: 56px;
+  height: 56px;
+  color: var(--terracotta-dark);
+}
+
+.landmark-card p {
+  margin: 0;
+  padding: 10px 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+@media (max-width: 780px) {
+  .landmarks-strip { grid-template-columns: repeat(2, 1fr); margin-top: -40px; }
+}
+
+/* ---------- Team photo placeholder ---------- */
+
+.team-photo-placeholder {
+  background: repeating-linear-gradient(135deg, var(--sand), var(--sand) 10px, #efdcc7 10px, #efdcc7 20px);
+  border: 1.5px dashed var(--gold);
+  border-radius: var(--radius);
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.team-photo-placeholder svg { width: 46px; height: 46px; color: var(--terracotta); }
