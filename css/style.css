@@ -110,14 +110,70 @@ nav.menu a.active {
 /* ---------- Hero (arch motif) ---------- */
 
 .hero {
-  background: linear-gradient(180deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
   color: var(--sand);
-  padding: 64px 24px 90px;
+  padding: 88px 24px 96px;
   position: relative;
   overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
 }
 
-.hero-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+/* mosaico di sfondo: griglia di icone, con crossfade al passaggio del mouse */
+.hero-mosaic {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.mosaic-cell {
+  position: relative;
+  overflow: hidden;
+  background: var(--terracotta-dark);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cell-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.cell-icon svg {
+  width: 40%;
+  height: 40%;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cell-icon.a { opacity: 1; transform: scale(1); }
+.cell-icon.b { opacity: 0; transform: scale(1.18); }
+
+.mosaic-cell:hover .cell-icon.a { opacity: 0; transform: scale(0.85); }
+.mosaic-cell:hover .cell-icon.b { opacity: 1; transform: scale(1); }
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(160deg, rgba(140, 61, 44, 0.9) 0%, rgba(181, 83, 60, 0.84) 100%);
+  pointer-events: none;
+}
+
+.hero-inner { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; text-align: center; width: 100%; }
+
+@media (max-width: 720px) {
+  .hero-mosaic { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+}
 
 .hero h1 { color: #fff; font-size: 2.8rem; }
 
@@ -137,6 +193,7 @@ nav.menu a.active {
   background-image: radial-gradient(circle at 30px 46px, transparent 26px, var(--cream) 27px);
   background-size: 60px 46px;
   background-repeat: repeat-x;
+  z-index: 2;
 }
 
 /* ---------- Page header (non-hero pages) ---------- */
@@ -447,53 +504,6 @@ footer a { color: var(--gold); }
 .leaflet-popup-content-wrapper { border-radius: 8px; }
 .leaflet-popup-content { font-family: "Inter", sans-serif; font-size: 0.85rem; }
 .leaflet-popup-content b { color: var(--terracotta-dark); font-family: "Playfair Display", serif; }
-
-/* ---------- Homepage: landmark illustrations ---------- */
-
-.landmarks-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin: -56px auto 40px;
-  max-width: 1000px;
-  padding: 0 24px;
-  position: relative;
-  z-index: 5;
-}
-
-.landmark-card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-strong);
-  overflow: hidden;
-  text-align: center;
-}
-
-.landmark-visual {
-  background: linear-gradient(160deg, var(--sand), #efdcc7);
-  height: 110px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.landmark-visual svg {
-  width: 56px;
-  height: 56px;
-  color: var(--terracotta-dark);
-}
-
-.landmark-card p {
-  margin: 0;
-  padding: 10px 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-@media (max-width: 780px) {
-  .landmarks-strip { grid-template-columns: repeat(2, 1fr); margin-top: -40px; }
-}
 
 /* ---------- Team photo placeholder ---------- */
 
