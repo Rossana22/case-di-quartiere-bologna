@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sfide affrontate — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html">Ontologia</a>
+      <a href="llm.html">LLM &amp; Prompting</a>
+      <a href="sparql.html">SPARQL</a>
+      <a href="results.html">Risultati</a>
+      <a href="challenges.html" class="active">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>Sfide affrontate</h1>
+  <p>Problemi tecnici incontrati durante il progetto e come sono stati risolti.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <h3 style="margin-top:0">Tab SPARQL Query di Protégé non funzionante</h3>
+    <p>
+      Dopo aver caricato lo schema e le istanze in Protégé e attivato il tab SPARQL Query da
+      Window → Tabs, il campo di inserimento della query non accettava input, né da tastiera né da
+      copia-incolla — un probabile bug di rendering.
+    </p>
+    <p><span class="label">Soluzione:</span> passaggio a uno strumento SPARQL online, in sostituzione del tab non funzionante di Protégé.</p>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0">Risultati sbagliati da un motore SPARQL online (non dai dati)</h3>
+    <p>
+      Un primo strumento online testato restituiva risultati sbagliati su più tipi di query: con
+      <code>OPTIONAL</code> combinato a <code>BIND</code> perdeva silenziosamente le colonne derivate;
+      con <code>COUNT</code>/<code>GROUP BY</code> non calcolava affatto l'aggregazione; con
+      <code>FILTER</code> + <code>REGEX</code> restituiva righe che non rispettavano il filtro e perdeva
+      una delle variabili richieste in <code>SELECT</code>.
+    </p>
+    <p>
+      <span class="label">Soluzione:</span> ogni risultato sospetto è stato verificato in modo
+      indipendente con <strong>rdflib</strong> (Python) sugli stessi file, per stabilire con certezza se
+      il problema fosse nei dati o nello strumento. In tutti e tre i casi il problema era lo strumento,
+      non il grafo. Si è quindi passati a <a href="https://atomgraph.github.io/SPARQL-Playground/" target="_blank" rel="noopener">SPARQL Playground</a>,
+      basato sul motore <strong>Comunica</strong>, conforme allo standard SPARQL 1.1 — i risultati da
+      quel momento sono risultati coerenti con la verifica indipendente.
+    </p>
+    <div class="note ok">
+      Questo episodio è un esempio concreto di metodologia di debugging: mai accettare un risultato
+      "0 righe" o "risultato inatteso" come conclusione sui dati, senza prima escludere che il
+      problema sia nello strumento di query.
+    </div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0">Righe duplicate con OPTIONAL su una proprietà multi-valore</h3>
+    <p>
+      Una prima versione della query di completezza (Query 1) selezionava direttamente l'orario stesso
+      all'interno dell'<code>OPTIONAL</code>, invece di un semplice booleano di presenza. Poiché una
+      Casa può avere più fasce orarie (<code>ac:hasAccessCondition</code>), questo produceva una riga
+      per ogni combinazione — molti apparenti "doppioni".
+    </p>
+    <p>
+      <span class="label">Soluzione:</span> non è un errore nei dati, ma una conseguenza della semantica
+      standard dei join in SPARQL su variabili multi-valore. Risolto riducendo l'esito di ciascun
+      <code>OPTIONAL</code> a un valore booleano con <code>BIND</code>, quando l'obiettivo è verificare
+      l'esistenza e non elencare ogni valore.
+    </p>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0">FILTER isolato dentro un ramo di UNION</h3>
+    <p>
+      La query per confrontare le Case di due quartieri (Query 3) restituiva inizialmente 0 risultati.
+      La causa non era nei dati: un blocco <code>{ FILTER(...) }</code> usato come ramo di
+      <code>UNION</code>, senza uno schema di tripla al suo interno, non eredita i binding di variabile
+      stabiliti fuori da quel ramo — valuta il filtro su una variabile non vincolata, che fallisce sempre.
+    </p>
+    <p>
+      <span class="label">Soluzione:</span> vincolare la variabile con una tripla e un <code>BIND</code>
+      dentro ciascun ramo dello <code>UNION</code>, invece di affidarsi a un <code>FILTER</code> isolato.
+      Verificato prima con rdflib (13 risultati attesi), poi confermato identico su SPARQL Playground.
+    </p>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0">Valore orario limite: "00:00:00" come chiusura</h3>
+    <p>
+      La Query 4 (orari del lunedì) ha evidenziato un caso limite: la Casa Giorgio Costa risulta con
+      apertura alle 13:00 e chiusura alle 00:00:00 — formalmente un valore <code>xsd:time</code> valido,
+      ma privo di senso se letto come "chiude prima di aprire".
+    </p>
+    <p>
+      <span class="label">Stato:</span> segnalato come punto da verificare manualmente sul CSV sorgente
+      — verosimilmente rappresenta un orario fino a mezzanotte da normalizzare, coerentemente con un
+      problema analogo già individuato altrove nel dataset ("24:00:00", anch'esso non un valore
+      <code>xsd:time</code> valido in senso stretto).
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>

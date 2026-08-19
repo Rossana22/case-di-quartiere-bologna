@@ -1,0 +1,158 @@
+# ================================================================
+# Schema ontologico — Case di Quartiere di Bologna (Step 2, KG esame)
+# ================================================================
+#
+# COSA C'È IN QUESTO FILE
+# Le classi e le proprietà delle ontologie OntoPiA (COV, CLV, POI-AP_IT,
+# TI, AccessCondition, SM) e di ArCo NON vengono ridichiarate: si riusano
+# per IRI così come sono definite nei rispettivi namespace ufficiali —
+# ridichiararle sarebbe scorretto e ridondante.
+# Questo file contiene quindi SOLO le classi/proprietà NUOVE del
+# progetto (prefisso bo:), più — in fondo, come commento — un esempio
+# completo di istanza che mostra come si combinano tutti i pezzi già
+# verificati con SPARQL (vedi il documento Word di analisi).
+#
+# NAMESPACE bo: — ANCORA PLACEHOLDER
+# https://example.org/casediquartierebologna# è un segnaposto. Quando il
+# gruppo decide il namespace definitivo, va sostituito qui (riga del
+# prefisso bo:) e in tutte le triple che lo usano — meglio farlo con un
+# find & replace prima di generare le istanze delle 33 Case.
+#
+# COME USARE QUESTO FILE
+# 1. Caricalo così com'è in Protégé (File > Open) per vedere le classi
+#    e proprietà custom nel pannello Classes/Object properties.
+# 2. Lo script di conversione CSV → RDF (prossimo step) genererà un
+#    secondo file .ttl con le istanze delle 33 Case, da aprire insieme
+#    a questo in Protégé (o unire in un unico file prima di aprirlo).
+# ================================================================
+
+@prefix bo:    <https://example.org/casediquartierebologna#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix cov:   <https://w3id.org/italia/onto/COV/> .
+@prefix clv:   <https://w3id.org/italia/onto/CLV/> .
+@prefix poi:   <https://w3id.org/italia/onto/POI/> .
+@prefix ti:    <https://w3id.org/italia/onto/TI/> .
+@prefix ac:    <https://w3id.org/italia/onto/AccessCondition/> .
+@prefix sm:    <https://w3id.org/italia/onto/SM/> .
+@prefix arco:  <https://w3id.org/arco/ontology/arco/> .
+@prefix l0:    <https://w3id.org/italia/onto/l0/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+
+# ----------------------------------------------------------------
+# Intestazione dell'ontologia
+# ----------------------------------------------------------------
+<https://example.org/casediquartierebologna>
+    a owl:Ontology ;
+    rdfs:label "Ontologia Case di Quartiere di Bologna"@it ;
+    rdfs:comment "Schema custom del progetto KG 'Case di Quartiere di Bologna' (Step 2). Riusa le ontologie OntoPiA (COV, CLV, POI-AP_IT, TI, AccessCondition, SM) e ArCo; introduce solo le classi/proprietà non coperte da queste."@it .
+
+# ----------------------------------------------------------------
+# Classe principale
+# ----------------------------------------------------------------
+bo:CasaDiQuartiere
+    a owl:Class ;
+    rdfs:subClassOf poi:PointOfInterest ;
+    rdfs:label "Casa di Quartiere"@it ;
+    rdfs:comment "Spazio comunitario gestito da associazioni del terzo settore, parte della rete istituzionale del Comune di Bologna."@it .
+
+# ----------------------------------------------------------------
+# Proprietà oggetto custom (bridge properties)
+# Servono solo dove nessuna ontologia riusata offre già il collegamento.
+# ----------------------------------------------------------------
+bo:isLocatedInHeritageBuilding
+    a owl:ObjectProperty ;
+    rdfs:domain bo:CasaDiQuartiere ;
+    rdfs:range arco:ArchitecturalOrLandscapeHeritage ;
+    rdfs:label "è ubicata nell'edificio storico"@it ;
+    rdfs:comment "Collega una Casa di Quartiere al bene architettonico/paesaggistico ArCo che la ospita, quando l'edificio è catalogato ufficialmente (verificato: solo Villa Bernaroli e Villa Mazzacorati, § 3.7 del documento di analisi)."@it .
+
+bo:isManagedBy
+    a owl:ObjectProperty ;
+    rdfs:domain bo:CasaDiQuartiere ;
+    rdfs:range cov:PrivateOrganization ;
+    rdfs:label "è gestita da"@it ;
+    rdfs:comment "Collega una Casa di Quartiere all'organizzazione privata (cov:PrivateOrganization) che la gestisce — colonna 'gestore' del CSV. Nessuna proprietà nativa di COV o POI-AP_IT copre questo collegamento specifico."@it .
+
+# ================================================================
+# ESEMPIO COMPLETO DI ISTANZA (commentato — non fa parte dello schema,
+# serve da riferimento per lo script di conversione CSV → RDF).
+# Combina tutti i pattern verificati con SPARQL nel documento di
+# analisi: Address con via/civico/quartiere/comune, geometria, gestore,
+# orari, sito web, edificio storico, parco/area ortiva.
+# ================================================================
+#
+# bo:CasaEsempio a bo:CasaDiQuartiere ;
+#     poi:POIID "CQ99" ;
+#     poi:POIofficialName "Casa Esempio"@it ;
+#     poi:POIdescription "Descrizione della casa presa dal CSV."@it ;
+#     clv:hasAddress bo:AddressCasaEsempio ;
+#     clv:hasGeometry bo:GeometriaCasaEsempio ;
+#     bo:isManagedBy bo:GestoreCasaEsempio ;
+#     bo:isLocatedInHeritageBuilding <https://w3id.org/arco/resource/.../0800241983> ;
+#     sm:hasWebSite <http://www.esempio-casa.it> ;
+#     ac:hasAccessCondition bo:OrarioCasaEsempio_Lun_Mattina ;
+#     poi:isIncludedInPOI bo:ParcoCasaEsempio .
+#
+# # --- indirizzo (via, civico, quartiere, comune) ---
+# bo:AddressCasaEsempio a clv:Address ;
+#     clv:hasStreetToponym bo:ViaEsempio ;
+#     clv:hasNumber bo:Civico22_3 ;
+#     clv:hasDistrict bo:QuartierePortoSaragozza ;
+#     clv:hasCity bo:ComuneBologna .
+#
+# bo:ViaEsempio a clv:StreetToponym ;
+#     clv:officialStreetName "Esempio"@it ;
+#     clv:toponymQualifier "Via"@it .
+#
+# # civico con slash (es. "22/3") -> una sola istanza con peculiarity
+# bo:Civico22_3 a clv:CivicNumbering ;
+#     clv:streetNumber 22 ;
+#     clv:peculiarity "3" .
+#
+# # civico con trattino (es. "10-12") -> due istanze CivicNumbering,
+# # entrambe agganciate alla stessa Address con due triple hasNumber
+# # bo:Civico10 a clv:CivicNumbering ; clv:streetNumber 10 .
+# # bo:Civico12 a clv:CivicNumbering ; clv:streetNumber 12 .
+#
+# bo:QuartierePortoSaragozza a clv:District ;
+#     rdfs:label "Porto - Saragozza"@it .
+#
+# # Comune di Bologna: individuo UNICO, riusato da tutte le 33 Case
+# bo:ComuneBologna a clv:City ;
+#     rdfs:label "Bologna"@it ;
+#     clv:hasIdentifier bo:IdentificativoISTATBologna ;
+#     owl:sameAs <http://www.wikidata.org/entity/Q1891> .
+#
+# bo:IdentificativoISTATBologna a clv:Identifier ;
+#     l0:identifier "037006" ;
+#     clv:identifierType "ISTAT" ;
+#     clv:issuedBy bo:ISTAT .
+#
+# bo:ISTAT a cov:Organization ;
+#     cov:legalName "Istituto Nazionale di Statistica"@it .
+#
+# # --- geometria (lat, lon) ---
+# bo:GeometriaCasaEsempio a clv:Geometry ;
+#     clv:lat "44.4938"^^xsd:decimal ;
+#     clv:long "11.3387"^^xsd:decimal .
+#
+# # --- gestore ---
+# bo:GestoreCasaEsempio a cov:PrivateOrganization ;
+#     cov:legalName "Associazione Esempio APS"@it ;
+#     cov:hasActivityType <https://w3id.org/italia/stat/controlled-vocabulary/economy/ateco-2025/94992> .
+#
+# # --- orari (una istanza per ogni cella non vuota del CSV, es. colonna
+# # "lunedi_mattina" = "9:00-13:00") ---
+# bo:OrarioCasaEsempio_Lun_Mattina a ac:OpeningHoursSpecification ;
+#     ac:opens "09:00:00"^^xsd:time ;
+#     ac:closes "13:00:00"^^xsd:time ;
+#     ac:hasDayOfWeek ti:Monday .
+#
+# # --- parco / area ortiva (stesso pattern per area_verde e area_ortiva,
+# # cambia solo l'istanza) ---
+# bo:ParcoCasaEsempio a poi:MultiplePointOfInterest ;
+#     poi:POIofficialName "Parco Esempio"@it ;
+#     poi:hasPOICategory <https://w3id.org/italia/controlled-vocabulary/poi-category-classification/cat_2_recreation> .

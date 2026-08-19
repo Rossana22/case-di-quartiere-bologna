@@ -1,0 +1,65 @@
+Sei un esperto di Semantic Web e Knowledge Graph.
+Il tuo compito è generare triple RDF valide in formato Turtle a partire dai
+dati CSV allegato (le Case di Quartiere di Bologna), utilizzando
+esclusivamente le classi e le proprietà presenti nell'ontologia fornita in
+allegato (file ontologia_per_prompt_zero_shot.ttl).
+
+Esempio tripla 1
+Subject: Casa di Quartiere con ID CQ01 → bo:CQ01
+Predicate: rdf:type
+Object: bo:CasaDiQuartiere
+RDF Triple: bo:CQ01 a bo:CasaDiQuartiere .
+
+Esempio tripla 2
+Subject: bo:CQ01
+Predicate: poi:POIofficialName
+Object: "Casa di Quartiere Giorgio Costa"@it
+RDF Triple: bo:CQ01 poi:POIofficialName "Casa di Quartiere Giorgio Costa"@it .
+
+Esempio tripla 3
+Subject: bo:CQ01
+Predicate: clv:hasAddress
+Object: Indirizzo con ID Address_CQ01 → bo:Address_CQ01
+RDF Triple: bo:CQ01 clv:hasAddress bo:Address_CQ01 .
+
+Esempio tripla 4
+Subject: bo:Address_CQ01
+Predicate: clv:hasStreetToponym
+Object: Via con ID Via_AzzoGardino → bo:Via_AzzoGardino
+RDF Triple: bo:Address_CQ01 clv:hasStreetToponym bo:Via_AzzoGardino .
+
+Esempio tripla 5
+Subject: bo:Via_AzzoGardino
+Predicate: clv:officialStreetName
+Object: "Azzo Gardino"@it
+RDF Triple: bo:Via_AzzoGardino clv:officialStreetName "Azzo Gardino"@it .
+
+Esempio tripla 6
+Subject: bo:CQ01
+Predicate: bo:isManagedBy
+Object: Organizzazione con ID Org_CQ01 → bo:Org_CQ01
+RDF Triple: bo:CQ01 bo:isManagedBy bo:Org_CQ01 .
+
+Esempio tripla 7
+Subject: bo:Org_CQ01
+Predicate: cov:legalName
+Object: "Associazione Giorgio Costa APS"@it
+RDF Triple: bo:Org_CQ01 cov:legalName "Associazione Giorgio Costa APS"@it .
+
+Esempio tripla 8
+Subject: bo:CQ01
+Predicate: ac:hasAccessCondition
+Object: Orario con ID CQ01_Lun_Mattina → bo:CQ01_Lun_Mattina
+RDF Triple: bo:CQ01 ac:hasAccessCondition bo:CQ01_Lun_Mattina .
+
+Esempio tripla 9
+Subject: bo:CQ01_Lun_Mattina
+Predicate: ac:opens
+Object: "09:00:00"^^xsd:time
+RDF Triple: bo:CQ01_Lun_Mattina ac:opens "09:00:00"^^xsd:time .
+
+Esempio tripla 10
+Subject: bo:CQ01_Lun_Mattina
+Predicate: ac:hasDayOfWeek
+Object: ti:Monday
+RDF Triple: bo:CQ01_Lun_Mattina ac:hasDayOfWeek ti:Monday .

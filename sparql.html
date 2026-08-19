@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPARQL — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html">Ontologia</a>
+      <a href="llm.html">LLM &amp; Prompting</a>
+      <a href="sparql.html" class="active">SPARQL</a>
+      <a href="results.html">Risultati</a>
+      <a href="challenges.html">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>Query SPARQL</h1>
+  <p>Verifica di completezza e correttezza del grafo — tutte le keyword richieste, con risultati reali.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <p style="margin-bottom:6px">Keyword SPARQL utilizzate in queste query:</p>
+    <div class="badges">
+      <span class="badge">OPTIONAL</span>
+      <span class="badge">DISTINCT</span>
+      <span class="badge">UNION</span>
+      <span class="badge">FILTER</span>
+      <span class="badge">REGEX</span>
+      <span class="badge">LIMIT</span>
+      <span class="badge">ORDER BY</span>
+      <span class="badge">BIND</span>
+    </div>
+    <p style="margin-top:14px">
+      Le query sono state eseguite su <a href="https://atomgraph.github.io/SPARQL-Playground/" target="_blank" rel="noopener">SPARQL Playground</a>
+      (motore Comunica, conforme a SPARQL 1.1) sul grafo unito (schema + 32 istanze), verificate in modo
+      indipendente con rdflib. Dettagli sugli strumenti provati nella pagina <a href="challenges.html">Sfide</a>.
+    </p>
+  </section>
+
+  <section class="card query-block">
+    <h3 style="margin-top:0">Query 1 — Completezza strutturale delle 32 Case</h3>
+    <p><span class="label">Obiettivo:</span> verificare che ogni Casa abbia gestore, indirizzo, orari e sito web, individuando eventuali lacune.</p>
+    <pre><code>PREFIX bo: &lt;https://example.org/casediquartierebologna#&gt;
+PREFIX poi: &lt;https://w3id.org/italia/onto/POI/&gt;
+PREFIX clv: &lt;https://w3id.org/italia/onto/CLV/&gt;
+PREFIX sm: &lt;https://w3id.org/italia/onto/SM/&gt;
+PREFIX ac: &lt;https://w3id.org/italia/onto/AccessCondition/&gt;
+
+SELECT DISTINCT ?nome ?haGestore ?haIndirizzo ?haOrari ?haSitoWeb
+WHERE {
+  ?casa a bo:CasaDiQuartiere ;
+        poi:POIofficialName ?nome .
+  OPTIONAL { ?casa bo:isManagedBy ?g . BIND(true AS ?haGestore) }
+  OPTIONAL { ?casa clv:hasAddress ?a . BIND(true AS ?haIndirizzo) }
+  OPTIONAL { ?casa ac:hasAccessCondition ?o . BIND(true AS ?haOrari) }
+  OPTIONAL { ?casa sm:hasWebSite ?w . BIND(true AS ?haSitoWeb) }
+}
+ORDER BY ?nome</code></pre>
+    <p><span class="label">Risultato:</span> 32 righe, una per Casa, senza duplicati. Indirizzo e sito web presenti su tutte e 32. Gestore assente solo per Stella e Tolmino. Orari assenti solo per Foscherara, Pilastro e Villa Mazzacorati.</p>
+    <p><span class="label">Interpretazione:</span> le lacune corrispondono esattamente alle celle vuote nel CSV originale per quelle stesse Case — il grafo riflette correttamente l'assenza del dato invece di inventarlo.</p>
+  </section>
+
+  <section class="card query-block">
+    <h3 style="margin-top:0">Query 2 — Coerenza testuale sui gestori (FILTER + REGEX)</h3>
+    <p><span class="label">Obiettivo:</span> individuare i gestori che si dichiarano "APS" (associazione di promozione sociale).</p>
+    <pre><code>PREFIX bo: &lt;https://example.org/casediquartierebologna#&gt;
+PREFIX poi: &lt;https://w3id.org/italia/onto/POI/&gt;
+PREFIX cov: &lt;https://w3id.org/italia/onto/COV/&gt;
+
+SELECT ?nome ?nomeGestore
+WHERE {
+  ?casa a bo:CasaDiQuartiere ;
+        poi:POIofficialName ?nome ;
+        bo:isManagedBy ?gestore .
+  ?gestore cov:legalName ?nomeGestore .
+  FILTER(REGEX(?nomeGestore, "APS", "i"))
+}
+ORDER BY ?nome</code></pre>
+    <p><span class="label">Risultato:</span> 11 risultati, tutti effettivamente contenenti "APS" nel nome (es. "Graf San Donato APS", "Centro Sociale e Orti Villa Bernaroli APS").</p>
+    <p><span class="label">Interpretazione:</span> nessuna corrispondenza spuria — il testo importato dal CSV è pulito e coerente.</p>
+  </section>
+
+  <section class="card query-block">
+    <h3 style="margin-top:0">Query 3 — Case per quartiere (UNION)</h3>
+    <p><span class="label">Obiettivo:</span> confrontare le Case di due quartieri (Navile e Savena) per verificare il collegamento al distretto.</p>
+    <pre><code>PREFIX bo: &lt;https://example.org/casediquartierebologna#&gt;
+PREFIX poi: &lt;https://w3id.org/italia/onto/POI/&gt;
+PREFIX clv: &lt;https://w3id.org/italia/onto/CLV/&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?nome ?quartiere
+WHERE {
+  ?casa a bo:CasaDiQuartiere ;
+        poi:POIofficialName ?nome ;
+        clv:hasAddress ?indirizzo .
+  ?indirizzo clv:hasDistrict ?distretto .
+  {
+    ?distretto rdfs:label "Navile"@it .
+    BIND("Navile"@it AS ?quartiere)
+  }
+  UNION
+  {
+    ?distretto rdfs:label "Savena"@it .
+    BIND("Savena"@it AS ?quartiere)
+  }
+}
+ORDER BY ?quartiere ?nome</code></pre>
+    <p><span class="label">Risultato:</span> 13 righe — 7 Case a Navile (Casa Gialla, Croce Coperta, Katia Bertasi, Montanari, Villa Torchi, Fondo Comini, Pescarola) e 6 a Savena (Area Ortiva Paleotto, Casa del Gufo, La Dacia, Villa Mazzacorati, San Rafel, Foscherara).</p>
+    <p><span class="label">Interpretazione:</span> il collegamento <code>clv:hasDistrict</code> funziona correttamente per entrambi i quartieri testati.</p>
+  </section>
+
+  <section class="card query-block">
+    <h3 style="margin-top:0">Query 4 — Orari del lunedì (OPTIONAL)</h3>
+    <p><span class="label">Obiettivo:</span> verificare che apertura/chiusura siano popolate coerentemente per una fascia specifica.</p>
+    <pre><code>PREFIX bo: &lt;https://example.org/casediquartierebologna#&gt;
+PREFIX poi: &lt;https://w3id.org/italia/onto/POI/&gt;
+PREFIX ac: &lt;https://w3id.org/italia/onto/AccessCondition/&gt;
+PREFIX ti: &lt;https://w3id.org/italia/onto/TI/&gt;
+
+SELECT ?nome ?apertura ?chiusura
+WHERE {
+  ?casa a bo:CasaDiQuartiere ;
+        poi:POIofficialName ?nome ;
+        ac:hasAccessCondition ?orario .
+  ?orario ac:hasDayOfWeek ti:Monday .
+  OPTIONAL { ?orario ac:opens ?apertura }
+  OPTIONAL { ?orario ac:closes ?chiusura }
+}
+ORDER BY ?nome</code></pre>
+    <p><span class="label">Risultato:</span> elenco coerente delle fasce del lunedì (es. Santa Viola 08:00-11:30 e 14:00-18:30). Un caso limite: Giorgio Costa risulta con apertura 13:00:00 e chiusura 00:00:00.</p>
+    <p><span class="label">Interpretazione:</span> il valore "00:00:00" come chiusura, formalmente valido, va verificato sul CSV sorgente — probabilmente indica un orario fino a mezzanotte da normalizzare (segnalato in <a href="challenges.html">Sfide</a>).</p>
+  </section>
+
+  <section class="card query-block">
+    <h3 style="margin-top:0">Query 5 — Le 10 aperture più mattiniere (LIMIT + ORDER BY)</h3>
+    <p><span class="label">Obiettivo:</span> controllo di plausibilità sui valori xsd:time di apertura.</p>
+    <pre><code>PREFIX bo: &lt;https://example.org/casediquartierebologna#&gt;
+PREFIX poi: &lt;https://w3id.org/italia/onto/POI/&gt;
+PREFIX ac: &lt;https://w3id.org/italia/onto/AccessCondition/&gt;
+
+SELECT DISTINCT ?nome ?apertura
+WHERE {
+  ?casa a bo:CasaDiQuartiere ;
+        poi:POIofficialName ?nome ;
+        ac:hasAccessCondition ?orario .
+  ?orario ac:opens ?apertura .
+}
+ORDER BY ?apertura
+LIMIT 10</code></pre>
+    <p><span class="label">Risultato:</span> Katia Bertasi (07:00) la più mattiniera, seguita da un gruppo di Case alle 08:00, poi Montanari (08:45) e Casa del Gufo (09:00).</p>
+    <p><span class="label">Interpretazione:</span> tutti i valori sono plausibili per orari di apertura di un servizio comunitario diurno — nessuna anomalia tra i 10 più mattinieri.</p>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>

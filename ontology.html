@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ontologia — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html" class="active">Ontologia</a>
+      <a href="llm.html">LLM &amp; Prompting</a>
+      <a href="sparql.html">SPARQL</a>
+      <a href="results.html">Risultati</a>
+      <a href="challenges.html">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>Ontologia</h1>
+  <p>Le ontologie riusate e la piccola estensione custom del progetto.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <h2 style="margin-top:0">Approccio: riuso prima di tutto</h2>
+    <p>
+      Coerentemente con le buone pratiche del web semantico, il progetto <strong>non ridichiara</strong>
+      classi o proprietà già disponibili nelle ontologie ufficiali della Pubblica Amministrazione
+      italiana. Vengono riusate per IRI così come definite nei rispettivi namespace:
+    </p>
+    <div class="grid-2">
+      <ul>
+        <li><code>cov:</code> — <a href="https://w3id.org/italia/onto/COV/" target="_blank" rel="noopener">Core Organization Vocabulary</a> (organizzazioni/gestori)</li>
+        <li><code>clv:</code> — <a href="https://w3id.org/italia/onto/CLV/" target="_blank" rel="noopener">Core Location Vocabulary</a> (indirizzi, geometrie, distretti)</li>
+        <li><code>poi:</code> — <a href="https://w3id.org/italia/onto/POI/" target="_blank" rel="noopener">Points of Interest</a> (le Case come punti di interesse)</li>
+      </ul>
+      <ul>
+        <li><code>ti:</code> — <a href="https://w3id.org/italia/onto/TI/" target="_blank" rel="noopener">Time Interval</a> (giorni della settimana)</li>
+        <li><code>ac:</code> — <a href="https://w3id.org/italia/onto/AccessCondition/" target="_blank" rel="noopener">Access Condition</a> (orari di apertura)</li>
+        <li><code>arco:</code> — <a href="https://w3id.org/arco" target="_blank" rel="noopener">ArCo</a> (beni architettonici storici)</li>
+      </ul>
+    </div>
+    <p>
+      L'intera rete di vocabolari controllati OntoPiA è mantenuta e documentata dal team Developers
+      Italia: <a href="https://github.com/italia/daf-ontologie-vocabolari-controllati" target="_blank" rel="noopener">
+      github.com/italia/daf-ontologie-vocabolari-controllati</a>.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Estensione custom — namespace <code>bo:</code></h2>
+    <p>
+      Solo dove le ontologie riusate non coprivano un concetto specifico del dominio, è stata introdotta
+      una piccola estensione con prefisso <code>bo:</code> (<code>https://example.org/casediquartierebologna#</code>):
+    </p>
+
+    <h3>Classe: <code>bo:CasaDiQuartiere</code></h3>
+    <p>Sottoclasse di <code>poi:PointOfInterest</code> — rappresenta lo spazio comunitario stesso.</p>
+    <pre><code>bo:CasaDiQuartiere
+    a owl:Class ;
+    rdfs:subClassOf poi:PointOfInterest ;
+    rdfs:label "Casa di Quartiere"@it ;
+    rdfs:comment "Spazio comunitario gestito da associazioni del terzo
+        settore, parte della rete istituzionale del Comune di Bologna."@it .</code></pre>
+
+    <h3>Proprietà: <code>bo:isManagedBy</code></h3>
+    <p>Collega una Casa all'organizzazione (<code>cov:PrivateOrganization</code>) che la gestisce — colonna <code>gestore</code> del CSV.</p>
+    <pre><code>bo:isManagedBy
+    a owl:ObjectProperty ;
+    rdfs:domain bo:CasaDiQuartiere ;
+    rdfs:range cov:PrivateOrganization ;
+    rdfs:label "è gestita da"@it .</code></pre>
+
+    <h3>Proprietà: <code>bo:isLocatedInHeritageBuilding</code></h3>
+    <p>Collega una Casa al bene architettonico ArCo che la ospita, quando l'edificio è ufficialmente catalogato come patrimonio storico.</p>
+    <pre><code>bo:isLocatedInHeritageBuilding
+    a owl:ObjectProperty ;
+    rdfs:domain bo:CasaDiQuartiere ;
+    rdfs:range arco:ArchitecturalOrLandscapeHeritage ;
+    rdfs:label "è ubicata nell'edificio storico"@it .</code></pre>
+
+    <div class="note ok">
+      Consistenza verificata con il reasoner <strong>HermiT</strong> in Protégé: nessuna inconsistenza
+      logica rilevata sul grafo completo (schema + 32 istanze). Dettagli in
+      <a href="challenges.html">Sfide affrontate</a>.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Esempio di istanza</h2>
+    <p>Un esempio (semplificato) di come i pattern si combinano per una singola Casa di Quartiere:</p>
+    <pre><code>bo:CasaEsempio a bo:CasaDiQuartiere ;
+    poi:POIID "CQ99" ;
+    poi:POIofficialName "Casa Esempio"@it ;
+    clv:hasAddress bo:AddressCasaEsempio ;
+    clv:hasGeometry bo:GeometriaCasaEsempio ;
+    bo:isManagedBy bo:GestoreCasaEsempio ;
+    sm:hasWebSite &lt;http://www.esempio-casa.it&gt; ;
+    ac:hasAccessCondition bo:OrarioCasaEsempio_Lun_Mattina .
+
+bo:AddressCasaEsempio a clv:Address ;
+    clv:hasStreetToponym bo:ViaEsempio ;
+    clv:hasNumber bo:Civico22_3 ;
+    clv:hasDistrict bo:QuartierePortoSaragozza ;
+    clv:hasCity bo:ComuneBologna .
+
+bo:OrarioCasaEsempio_Lun_Mattina a ac:OpeningHoursSpecification ;
+    ac:opens "09:00:00"^^xsd:time ;
+    ac:closes "13:00:00"^^xsd:time ;
+    ac:hasDayOfWeek ti:Monday .</code></pre>
+    <p>
+      Lo schema completo (con tutte le note di modellazione) è disponibile per il download:
+      <a href="data/schema_case_di_quartiere.ttl" download>schema_case_di_quartiere.ttl</a>
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>

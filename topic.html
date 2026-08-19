@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il progetto — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html" class="active">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html">Ontologia</a>
+      <a href="llm.html">LLM &amp; Prompting</a>
+      <a href="sparql.html">SPARQL</a>
+      <a href="results.html">Risultati</a>
+      <a href="challenges.html">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>Il progetto</h1>
+  <p>Cosa sono le Case di Quartiere, quale lacuna informativa abbiamo affrontato e perché.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <h2 style="margin-top:0">Cosa sono le Case di Quartiere</h2>
+    <p>
+      Le Case di Quartiere sono una rete di spazi pubblici di comunità promossa dal
+      <a href="https://www.comune.bologna.it/" target="_blank" rel="noopener">Comune di Bologna</a>,
+      gestiti da associazioni di promozione sociale, cooperative ed enti del terzo settore. Ogni Casa
+      offre attività culturali, sociali, ricreative e di aggregazione rivolte ai cittadini del quartiere
+      in cui è collocata, spesso all'interno di edifici storici messi a disposizione dal Comune.
+    </p>
+    <p>
+      Il progetto copre le <strong>32 Case di Quartiere</strong> attive a Bologna, distribuite nei sei
+      quartieri cittadini (Navile, Savena, Porto-Saragozza, San Donato-San Vitale, Santo Stefano,
+      Borgo Panigale-Reno).
+    </p>
+    <div class="img-placeholder">Mappa delle Case di Quartiere sui quartieri di Bologna — sostituire con immagine reale</div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">La lacuna informativa (gap)</h2>
+    <p>
+      Il Comune di Bologna pubblica l'elenco delle Case di Quartiere come dataset aperto in formato
+      <strong>tabellare (CSV)</strong>: nome, via, gestore, coordinate, quartiere, area verde/ortiva
+      associata, sito web e orari di apertura per fascia giornaliera. Si tratta di un formato
+      utilizzabile ma <em>chiuso semanticamente</em>: non collega le Case a vocabolari controllati,
+      non distingue in modo standardizzato i concetti di indirizzo, orario o organizzazione gestore, e
+      non permette di verificare automaticamente, ad esempio, se la sede di una Casa coincide con un
+      bene architettonico già catalogato nel patrimonio culturale nazionale.
+    </p>
+    <p>
+      Questa mancanza di interoperabilità semantica è il gap che il progetto affronta: trasformare il
+      dataset tabellare in un <strong>grafo di conoscenza collegato (Linked Open Data)</strong>, basato
+      su ontologie standard della Pubblica Amministrazione italiana, così da rendere le informazioni
+      sulle Case di Quartiere interrogabili, confrontabili e collegabili ad altre basi di conoscenza
+      pubbliche (es. il patrimonio culturale ArCo).
+    </p>
+    <div class="note">
+      Il dataset sorgente utilizzato è la versione ripulita e strutturata del CSV pubblico delle Case di
+      Quartiere (32 righe, 21 colonne), dettagliata nella pagina <a href="methodology.html">Metodologia</a>.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Perché un Knowledge Graph</h2>
+    <p>
+      Rappresentare le Case di Quartiere come Knowledge Graph, invece che come semplice tabella,
+      permette di: interrogare i dati con query espressive (es. "quali Case sono gestite da una APS e
+      aprono prima delle 9:00?"); collegare ogni Casa a entità esterne già esistenti nel web semantico
+      (distretti amministrativi, categorie di punti di interesse, beni architettonici); e arricchire
+      progressivamente il grafo con conoscenza aggiuntiva generata da LLM, mantenendo tracciabilità e
+      verificabilità di ogni tripla introdotta.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>

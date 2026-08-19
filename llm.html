@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM &amp; Prompting — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html">Ontologia</a>
+      <a href="llm.html" class="active">LLM &amp; Prompting</a>
+      <a href="sparql.html">SPARQL</a>
+      <a href="results.html">Risultati</a>
+      <a href="challenges.html">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>LLM &amp; Prompting</h1>
+  <p>Tre tecniche di prompting, due modelli a confronto, per generare le triple RDF di istanza.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <h2 style="margin-top:0">Perché più tecniche di prompting</h2>
+    <p>
+      Per la generazione delle triple RDF a partire dal CSV abbiamo sperimentato tre tecniche di
+      prompting differenti sullo stesso compito, per osservare come la quantità e il tipo di guida
+      fornita al modello influenzino la qualità e la correttezza dell'output.
+    </p>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0">1. Zero-shot</h3>
+    <p>
+      Al modello viene fornito solo il CSV sorgente e un'ontologia di riferimento <em>puramente
+      vocabolario</em> — senza alcun esempio di istanza già completata — per verificare la sua capacità
+      di generalizzare autonomamente dal solo schema.
+    </p>
+
+    <h3>2. Few-shot</h3>
+    <p>
+      Al modello vengono forniti alcuni esempi completi di tripla (soggetto/predicato/oggetto già
+      risolti) prima di chiedere la generazione sul resto del dataset, per guidarne il pattern di
+      risposta.
+    </p>
+    <pre><code>Esempio tripla 1
+Subject: Casa di Quartiere con ID CQ01 → bo:CQ01
+Predicate: rdf:type
+Object: bo:CasaDiQuartiere
+RDF Triple: bo:CQ01 a bo:CasaDiQuartiere .
+
+Esempio tripla 2
+Subject: bo:CQ01
+Predicate: poi:POIofficialName
+Object: "Casa di Quartiere Giorgio Costa"@it
+RDF Triple: bo:CQ01 poi:POIofficialName "Casa di Quartiere Giorgio Costa"@it .
+
+[...]</code></pre>
+    <p><a href="data/prompt_few_shot.txt" download>Scarica il prompt few-shot completo</a></p>
+
+    <h3>3. Chain-of-thought</h3>
+    <p>
+      Al modello viene chiesto di ragionare esplicitamente passo dopo passo prima di generare le
+      triple: identificare soggetto ed entità secondarie, estrarre le proprietà con il datatype
+      corretto, verificare dominio/range — includendo regole esplicite per i casi limite (es. civico
+      con "/" vs "-", edificio storico solo se confermato in ArCo).
+    </p>
+    <pre><code>1. IDENTIFICAZIONE DEL SOGGETTO PRINCIPALE E DELLE ENTITÀ SECONDARIE
+   [...costruzione URI, quali entità secondarie creare in base alle
+   colonne valorizzate...]
+
+2. ESTRAZIONE DELLE PROPRIETÀ (DATATYPE E OBJECT PROPERTIES)
+   [...quale proprietà si adatta al dato, quale datatype XSD...]
+
+3. VERIFICA DEI DOMINI E DEI RANGE
+   [...controllo che soggetto/oggetto rispettino domain/range...]</code></pre>
+    <p><a href="data/prompt_chain_of_thought.txt" download>Scarica il prompt chain-of-thought completo</a></p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Confronto tra modelli: Claude vs Gemini (zero-shot)</h2>
+    <p>
+      Per la tecnica zero-shot abbiamo confrontato l'output di due Large Language Model — <strong>Claude</strong>
+      e <strong>Gemini</strong> — a parità di prompt, CSV e ontologia, verificando ogni tripla generata
+      contro il CSV sorgente con uno script Python indipendente (rdflib + pandas).
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Aspetto verificato</th><th>Esito</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Campi strutturati (indirizzo, coordinate, gestore, sito web)</td><td>Prestazioni identiche tra i due modelli</td></tr>
+        <tr><td>Orari con celle di testo ambiguo</td><td>Claude ha gestito meglio i casi ambigui rispetto a Gemini</td></tr>
+        <tr><td>Copertura dell'area ortiva</td><td>Claude ha coperto tutti i casi presenti nel CSV; Gemini ne ha omessi alcuni</td></tr>
+        <tr><td>Identificativo ArCo per edificio storico</td><td>Gemini ha probabilmente generato un identificativo catalografico non derivabile dal CSV fornito (dato verosimilmente inventato)</td></tr>
+        <tr><td>Modellazione del civico con "/" (slash)</td><td>Nessuno dei due modelli ha applicato correttamente la regola di split — regola presente solo nel prompt chain-of-thought, non nel vocabolario zero-shot puro</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note warn">
+      <strong>Discussione della differenza di comportamento.</strong> Il caso più significativo è
+      l'identificativo ArCo generato da Gemini per un edificio storico: si tratta di un'informazione
+      non presente né nel CSV né nell'ontologia fornita, quindi la sua comparsa nell'output è
+      verosimilmente un'<em>allucinazione</em> del modello, non un'inferenza corretta. Questo
+      sottolinea l'importanza di verificare ogni tripla generata da un LLM contro fonti esterne prima
+      di considerarla affidabile, invece di fidarsi ciecamente dell'output.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>

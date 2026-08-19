@@ -1,0 +1,45 @@
+Sei un esperto di Semantic Web e Knowledge Graph.
+Il tuo compito è generare triple RDF (in sintassi Turtle) a partire dai dati
+estratti dal file CSV delle Case di Quartiere di Bologna allegato,
+utilizzando esclusivamente le classi e le proprietà presenti nell'ontologia
+definita nel file "ontologia_per_prompt_zero_shot.ttl".
+
+Per ogni riga del CSV che ti viene fornita, devi ragionare e procedere passo
+dopo passo seguendo questa precisa catena di pensiero (Chain-of-Thought):
+
+1. IDENTIFICAZIONE DEL SOGGETTO PRINCIPALE E DELLE ENTITÀ SECONDARIE:
+Analizza il valore di "ed-casa" (o ID_casa) per costruire l'URI del
+soggetto principale (es. bo:CQ01). Il soggetto è sempre di classe
+bo:CasaDiQuartiere. Poi individua quali entità secondarie questa riga
+richiede di creare, in base a quali colonne sono effettivamente
+valorizzate: un indirizzo (clv:Address, sempre presente), un civico
+(clv:CivicNumbering — se il valore contiene "/" crea una sola istanza con
+clv:peculiarity; se contiene "-" crea due istanze distinte), un gestore
+(cov:PrivateOrganization, se la colonna gestore è valorizzata), una o più
+fasce orarie (ac:OpeningHoursSpecification, una per ogni cella
+giorno×fascia non vuota), un parco/orto (poi:MultiplePointOfInterest, solo
+se area_verde o area_ortiva sono valorizzate), un collegamento
+all'edificio storico (bo:isLocatedInHeritageBuilding, solo se la Casa è
+una delle due effettivamente confermate nel catalogo ArCo — Villa
+Bernaroli o Villa Mazzacorati — non per una generica risposta "sì" nella
+colonna Edificio storico).
+
+2. ESTRAZIONE DELLE PROPRIETÀ (DATATYPE E OBJECT PROPERTIES):
+Esamina ogni colonna valorizzata di quella riga. Quale proprietà
+dell'ontologia si adatta semanticamente a questo dato? Qual è il tipo di
+dato corretto per il Letterale (es. xsd:decimal per lat/long, xsd:int per
+la parte numerica del civico, xsd:time per gli orari nel formato
+"09:00:00", stringa con tag di lingua @it per nomi/descrizioni)?
+
+3. VERIFICA DEI DOMINI E DEI RANGE:
+Controlla che il Soggetto appartenga al rdfs:domain corretto della
+proprietà e che l'Oggetto rispetti il rdfs:range. Ad esempio: clv:hasNumber
+si applica solo a clv:Address e ha come range clv:CivicNumbering (non un
+numero diretto sulla Casa); ac:hasDayOfWeek si applica solo a
+ac:OpeningHoursSpecification e il suo range sono gli individui fissi
+ti:Monday…ti:Sunday, non una stringa libera come "Lunedì".
+
+Ragioniamo passo dopo passo. Scansiona l'intero CSV fornito riga per riga e,
+per ciascuna, individua quali colonne opzionali sono effettivamente
+valorizzate (orari, area_verde, area_ortiva ed Edificio storico non sono
+presenti per tutte le 33 Case), prima di generare le triple corrispondenti.

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risultati — Case di Quartiere di Bologna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">Case di Quartiere <span>BO</span></a>
+    <nav class="menu">
+      <a href="index.html">Home</a>
+      <a href="topic.html">Il progetto</a>
+      <a href="methodology.html">Metodologia</a>
+      <a href="ontology.html">Ontologia</a>
+      <a href="llm.html">LLM &amp; Prompting</a>
+      <a href="sparql.html">SPARQL</a>
+      <a href="results.html" class="active">Risultati</a>
+      <a href="challenges.html">Sfide</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-header">
+  <h1>Risultati</h1>
+  <p>Cosa abbiamo ottenuto al termine del progetto.</p>
+</section>
+
+<main>
+
+  <section class="card">
+    <div class="grid-3">
+      <div>
+        <h3>32 / 32</h3>
+        <p>Case di Quartiere modellate come istanze <code>bo:CasaDiQuartiere</code>, tutte con indirizzo e sito web completi</p>
+      </div>
+      <div>
+        <h3>0</h3>
+        <p>Inconsistenze logiche rilevate dal reasoner HermiT sul grafo completo</p>
+      </div>
+      <div>
+        <h3>11</h3>
+        <p>Gestori identificati come APS tramite query FILTER + REGEX, tutti verificati corretti</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Sintesi della verifica</h2>
+    <table>
+      <thead><tr><th>Controllo</th><th>Esito</th></tr></thead>
+      <tbody>
+        <tr><td>Consistenza logica (HermiT)</td><td>Nessuna inconsistenza rilevata</td></tr>
+        <tr><td>Completezza indirizzo / sito web</td><td>32/32 corrette</td></tr>
+        <tr><td>Completezza gestore</td><td>30/32 — mancano Stella e Tolmino (coerente col CSV sorgente)</td></tr>
+        <tr><td>Completezza orari</td><td>29/32 — mancano Foscherara, Pilastro, Villa Mazzacorati (coerente col CSV sorgente)</td></tr>
+        <tr><td>Coerenza testuale nomi gestore ("APS")</td><td>11/11 corrispondenze corrette, nessun falso positivo</td></tr>
+        <tr><td>Collegamento al quartiere (Navile / Savena)</td><td>13/13 corrette (7 + 6)</td></tr>
+        <tr><td>Plausibilità orari di apertura</td><td>Nessuna anomalia tra le 10 aperture più mattiniere; un caso segnalato per revisione (vedi Sfide)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 style="margin-top:0">Cosa abbiamo imparato dal confronto tra LLM</h2>
+    <p>
+      Entrambi i modelli testati in modalità zero-shot hanno prodotto risultati validi sui campi
+      strutturati del CSV, ma con differenze concrete sui casi ambigui: gestione del testo libero
+      negli orari, copertura completa dell'area ortiva, e — soprattutto — il rischio concreto di
+      allucinazione su fatti non presenti nella fonte (identificativo ArCo generato da Gemini).
+      Questo conferma l'importanza di un passaggio di verifica indipendente (SPARQL + controllo
+      incrociato col CSV) prima di considerare affidabile qualsiasi tripla generata da un LLM.
+      Dettagli completi nella pagina <a href="llm.html">LLM &amp; Prompting</a>.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  Progetto d'esame — Case di Quartiere di Bologna — Knowledge Graph con OntoPiA/ArCo e LLM<br>
+  Rossana Pedroni · Camilla Sabato · Elena Tufoni — 2026<br>
+  <a href="https://github.com/Rossana22/case-di-quartiere-bologna">Repository GitHub</a>
+</footer>
+
+</body>
+</html>
