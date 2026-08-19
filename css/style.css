@@ -110,70 +110,14 @@ nav.menu a.active {
 /* ---------- Hero (arch motif) ---------- */
 
 .hero {
+  background: linear-gradient(180deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
   color: var(--sand);
-  padding: 88px 24px 96px;
+  padding: 64px 24px 90px;
   position: relative;
   overflow: hidden;
-  min-height: 420px;
-  display: flex;
-  align-items: center;
 }
 
-/* mosaico di sfondo: griglia di icone, con crossfade al passaggio del mouse */
-.hero-mosaic {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-}
-
-.mosaic-cell {
-  position: relative;
-  overflow: hidden;
-  background: var(--terracotta-dark);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.cell-icon {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.cell-icon svg {
-  width: 40%;
-  height: 40%;
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.55);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.cell-icon.a { opacity: 1; transform: scale(1); }
-.cell-icon.b { opacity: 0; transform: scale(1.18); }
-
-.mosaic-cell:hover .cell-icon.a { opacity: 0; transform: scale(0.85); }
-.mosaic-cell:hover .cell-icon.b { opacity: 1; transform: scale(1); }
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(160deg, rgba(140, 61, 44, 0.9) 0%, rgba(181, 83, 60, 0.84) 100%);
-  pointer-events: none;
-}
-
-.hero-inner { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; text-align: center; width: 100%; }
-
-@media (max-width: 720px) {
-  .hero-mosaic { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
-}
+.hero-inner { max-width: 900px; margin: 0 auto; text-align: center; }
 
 .hero h1 { color: #fff; font-size: 2.8rem; }
 
@@ -418,6 +362,58 @@ footer {
 }
 
 footer a { color: var(--gold); }
+
+/* ---------- Homepage: galleria "bento" con effetto flip 3D ----------
+   Griglia asimmetrica (una card grande + quattro piccole); al passaggio
+   del mouse ogni card ruota su se stessa (rotateY) rivelando un secondo
+   scorcio sul retro. Meccanismo ed layout scelti apposta per essere
+   diversi da una semplice griglia con dissolvenza. */
+
+.bento-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 130px;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.flip-card {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.flip-card.tile-lg { grid-column: span 2; grid-row: span 2; }
+
+.flip-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card:hover .flip-inner { transform: rotateY(180deg); }
+
+.flip-front, .flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.flip-back { transform: rotateY(180deg); }
+
+.flip-front svg, .flip-back svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .bento-gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; }
+  .flip-card.tile-lg { grid-column: span 2; grid-row: span 1; height: 200px; }
+}
 
 /* ---------- Map page ---------- */
 
