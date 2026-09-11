@@ -171,7 +171,7 @@ Object.keys(COLORS).forEach(q => {
     card.className = 'gallery-card';
     card.innerHTML = `
       <div class="gallery-img">
-        <svg class="icon-building"><use href="#building-icon"></use></svg>
+        <img src="images/${c.id}.jpg" alt="${c.nome}" loading="lazy">
       </div>
       <div class="gallery-body">
         <h4>${c.nome}</h4>
