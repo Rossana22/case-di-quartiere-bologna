@@ -477,10 +477,18 @@ footer a { color: var(--gold); }
 .gallery-img {
   background: repeating-linear-gradient(135deg, var(--sand), var(--sand) 10px, #efdcc7 10px, #efdcc7 20px);
   border-bottom: 1.5px dashed var(--gold);
-  height: 130px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.gallery-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .icon-building { width: 54px; height: 54px; color: var(--terracotta-dark); }
